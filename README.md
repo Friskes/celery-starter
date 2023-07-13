@@ -35,9 +35,9 @@ Arguments can be passed in any order, it doesn't matter.
 `<project_name>`
 
 #### Optional Arguments:
-`-h` Show help message.
-`-b` Excludes the beat server at startup.
-`-f` Excludes the flower server at startup.
+`-h` Show help message.<br/>
+`-b` Excludes the beat server at startup.<br/>
+`-f` Excludes the flower server at startup.<br/>
 `-d` Displays information about successful/unsuccessful completion of processes.
 
 ##### To stopped program pressing the keyboard shortcut CTRL+C
