@@ -1,4 +1,4 @@
-## Django autoreload adapted for automatic reloading of celery and its modules when changing files in online
+## Django autoreload adapting for automatic reloading of celery and its modules when modify files in online mode
 
 ### Installing the program
 
