@@ -32,11 +32,22 @@ class Command(BaseCommand):
         flower = 'flower ' if not self.options['flower'] else ''
 
         if self.options['debug']:
-            start_msg = L.start_msg % (self.project_name, beat, flower) + L.debug_msg
+            msg = L.start_msg % (self.project_name, beat, flower) + L.debug_msg
         else:
-            start_msg = L.start_msg % (self.project_name, beat, flower)
+            msg = L.start_msg % (self.project_name, beat, flower)
 
-        self.stdout.write(self.style.SUCCESS(start_msg))
+        colored_msg = (self.style.SUCCESS(msg.split('[')[0].split('(')[0] + '(')
+                       + self.style.MIGRATE_HEADING(msg.split('[')[0].split('(')[1].split(')')[0])
+                       + self.style.SUCCESS(') [')
+                       + self.style.HTTP_SERVER_ERROR(msg.split('[')[1].split(']')[0]))
+        if self.options['debug']:
+            colored_msg += (self.style.SUCCESS(']' + msg.split('[')[1].split(']')[1].split('DEBUG')[0])
+                            + self.style.WARNING('DEBUG')
+                            + self.style.SUCCESS(msg.split('[')[1].split(']')[1].split('DEBUG')[1]))
+        else:
+            colored_msg += self.style.SUCCESS(']' + msg.split('[')[1].split(']')[1])
+
+        self.stdout.write(colored_msg)
 
         autoreload.run_with_reloader(self.restart_celery)
 
@@ -68,7 +79,7 @@ class Command(BaseCommand):
         self.read_pid_file("celerybeat.pid")
 
         subprocess.Popen(
-            shlex.split(f"celery -A {self.project_name} worker -l info -P eventlet"),
+            shlex.split(f"celery -A {self.project_name} worker -l info -P eventlet"), # -P solo # -P threads # -P gevent
             stdin=subprocess.PIPE, stderr=subprocess.STDOUT
         )
 
