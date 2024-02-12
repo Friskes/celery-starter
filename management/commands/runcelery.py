@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.utils import autoreload
 from django.conf import settings
 
-import psutil
+# import psutil
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -44,13 +44,7 @@ class Command(BaseCommand):
                     except OSError:
                         pass
                     # try:
-                    #     if self.options['debug']:
-                    #         subprocess.check_call("TASKKILL /F /PID {pid} /T".format(pid=int(line)))
-                    #     else:
-                    #         subprocess.check_call(
-                    #             "TASKKILL /F /PID {pid} /T".format(pid=int(line)),
-                    #             stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-                    #         )
+                    #     subprocess.check_call(f"TASKKILL /F /PID {int(line)} /T", **self._std)
                     # except subprocess.CalledProcessError:
                     #     pass
 
@@ -91,51 +85,43 @@ class Command(BaseCommand):
                 stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE
             )
 
-    def get_main_process(self) -> set[int]:
-        """
-        Возвращает список pid активных celery процессов (если они есть).
-        """
-        processes_pids = set()
-        for process in psutil.process_iter():
-            ppid = process.ppid()
-            if ppid == 0:
-                continue
-            try:
-                parent = psutil.Process(ppid)
-            except psutil.NoSuchProcess:
-                pass
-            else:
-                if process.name() == 'python.exe' and parent.name() == 'celery.exe':
-                    processes_pids.add(process.pid)
-                    processes_pids.add(parent.pid)
-            return processes_pids
+    # def get_main_process(self) -> set[int]:
+    #     """
+    #     Возвращает список pid активных celery процессов (если они есть).
+    #     """
+    #     processes_pids = set()
+    #     for process in psutil.process_iter():
+    #         ppid = process.ppid()
+    #         if ppid == 0:
+    #             continue
+    #         try:
+    #             parent = psutil.Process(ppid)
+    #         except psutil.NoSuchProcess:
+    #             pass
+    #         else:
+    #             if process.name().startswith('python') and parent.name().startswith('celery'):
+    #                 processes_pids.add(process.pid)
+    #                 processes_pids.add(parent.pid)
+    #         return processes_pids
 
-    def kill_celery_processes(self, processes_pids: set[int]):
+    def kill_celery_processes(self, processes_pids: set[int] = set()):
         """
         Убивает celery процесс(ы).
         """
         if sys.platform == "win32":
-            if self.options['debug']:
-                subprocess.call(shlex.split("TASKKILL /F /T /IM celery.exe"))
-                # subprocess.run(["celery", "-A", self.project_name, "control", "shutdown"])
-            else:
-                subprocess.call(
-                    shlex.split("TASKKILL /F /T /IM celery.exe"),
-                    stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-                )
-                # subprocess.run(
-                #     ["celery", "-A", self.project_name, "control", "shutdown"],
-                #     stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE
-                # )
+            subprocess.call(shlex.split("TASKKILL /F /T /IM celery.exe"), **self._std)
+            # subprocess.run(["celery", "-A", self.project_name, "control", "shutdown"], **self._std)
         else:
-            for pid in processes_pids:
-                os.kill(pid, signal.SIGTERM)
+            subprocess.call(shlex.split("pkill celery"), **self._std)
+            # for pid in processes_pids:
+            #     os.kill(pid, signal.SIGTERM)
 
     def reload_celery(self):
         """
         Убивает процесс(ы) celery если он(и) есть и заного запускает celery.
         """
-        self.kill_celery_processes(self.get_main_process())
+        # self.kill_celery_processes(self.get_main_process())
+        self.kill_celery_processes()
 
         if sys.platform == "win32":
             self.run_celery_win()
@@ -213,8 +199,10 @@ class Command(BaseCommand):
                 + self.style.WARNING('DEBUG')
                 + self.style.SUCCESS(msg.split('[')[1].split(']')[1].split('DEBUG')[1])
             )
+            self._std = {}
         else:
             colored_msg += self.style.SUCCESS(']' + msg.split('[')[1].split(']')[1])
+            self._std = dict(stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
 
         self.stdout.write(colored_msg)
 
