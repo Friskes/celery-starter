@@ -25,8 +25,8 @@ Your Project Folder
 ```
 
 ### Dependencies
-- python-dotenv
-- psutil
+- `python-dotenv`
+- if you run on Linux must installed: `procps`
 
 ### Working with the program
 
@@ -57,8 +57,7 @@ The command enclosed in quotation marks gets into the positional arguments and r
 The `--beat` `--flower` commands fall into the optional arguments and turn off the beat and flower of the server.
 ```shell script
 python manage.py runcelery "celery --app=${CELERY_APP} worker -E \
---statedb=/var/run/celery/worker-example@%h.state \
---hostname=worker-example@%h --uid=nobody --gid=nogroup \
---loglevel=INFO \
---logfile=/var/log/celery/worker-example.log" --beat --flower
+--hostname=worker-example@%h
+--uid=nobody --gid=nogroup \
+--loglevel=INFO" --beat --flower
 ```
