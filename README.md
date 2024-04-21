@@ -1,34 +1,18 @@
-## Django command created to run `celery (worker, beat, flower)` with one command and to automatically reboot servers after changing files
+## Django command to run `celery (worker, beat, flower)` with automatically reboot server after changing files
 
-### Installing the program
+## Requirements
+- django>=4.2.11
+celery>=5.3.6
+python-dotenv>=1.0.1
 
-##### Copy the `management` directory and move it to the directory of your application as shown in the diagram
-
+## Install
+1. `pip install celery-starter`
+2. Add app name to `INSTALLED_APPS`
+```python
+INSTALLED_APPS = [
+    'celery_starter',
+]
 ```
-Your Project Folder
-│
-├── <project_name_folder>
-│   ├── settings.py
-│   ├── wsgi.py
-│   └── other files..
-├── <application_name_folder>
-│   ├── models.py
-│   ├── views.py
-│   ├── management
-│   │   ├── commands
-│   │   │   ├── __init__.py
-│   │   │   ├── _localization.py
-│   │   │   └── runcelery.py
-│   │   └── __init__.py
-│   └── other files..
-└── other folders..
-```
-
-### Dependencies
-- `python-dotenv`
-- if you run on Linux must installed: `procps`
-
-### Working with the program
 
 #### Command to run the program:
 ```

@@ -1,32 +1,28 @@
 from __future__ import annotations
+
 import os
-import sys
 import shlex
 import signal
 import subprocess
+import sys
 
+from celery.app import default_app
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import autoreload
-from django.conf import settings
+from dotenv import find_dotenv, load_dotenv
 
-# import psutil
-from dotenv import load_dotenv, find_dotenv
+from . import _localization as L  # noqa: N812
+
 load_dotenv(find_dotenv())
-
-from . import _localization as L
-
-
-# https://habr.com/ru/articles/415049/
-# https://testdriven.io/courses/django-celery/auto-reload/
-# https://simpleisbetterthancomplex.com/tutorial/2018/08/27/how-to-create-custom-django-management-commands.html
-# https://docs.djangoproject.com/en/4.2/howto/custom-management-commands/
 
 
 class Command(BaseCommand):
     """
     https://github.com/Friskes/celery_starter
     """
-    help = L.command_help + " https://github.com/Friskes/celery_starter"
+
+    help = L.command_help + ' https://github.com/Friskes/celery_starter'
 
     BASE_DIR = str(settings.BASE_DIR) + os.sep
 
@@ -36,8 +32,7 @@ class Command(BaseCommand):
         Файл создается автоматически средствами celery beat
         """
         if file_name in os.listdir(self.BASE_DIR):
-            with open(file_name, 'r') as file:
-
+            with open(file_name) as file:
                 for line in file.readlines():
                     try:
                         os.kill(int(line), signal.SIGTERM)
@@ -55,8 +50,14 @@ class Command(BaseCommand):
         Запускает celery[worker/beat/flower] на Windows
         с выводом логов в одну консоль, для локальной разработки.
         """
-        #                                                             -P eventlet # -P threads # -P gevent
-        celeryworker_cmd = f"celery -A {self.celery_app} worker -E -l {self.options['loglevel']} -P solo"
+        # -P --pool
+        # prefork  # default (windows not work, linux multiple processes)
+        # solo  # (windows/linux single process)
+        # threads  # (windows/linux multiple threading) too slow
+        # eventlet | gevent  # (windows/linux multiple processes)
+        celeryworker_cmd = (
+            f"celery -A {self.celery_app} worker -E -l {self.options['loglevel']} -P gevent"
+        )
         if self.options['logfile']:
             celeryworker_cmd += f" --logfile={self.options['logfile']}"
 
@@ -65,65 +66,45 @@ class Command(BaseCommand):
         # )
         subprocess.Popen(
             self.command if self.command else shlex.split(celeryworker_cmd),
-            stdin=subprocess.PIPE, stderr=subprocess.STDOUT
+            stdin=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
         )
 
         if not self.options['beat']:
-            self.read_pid_file("celerybeat.pid")
-            celerybeat_cmd = f"celery -A {self.celery_app} beat -l {self.options['loglevel']} --pidfile=celerybeat.pid"
+            self.read_pid_file('celerybeat.pid')
+            celerybeat_cmd = f"celery -A {self.celery_app} beat -l {self.options['loglevel']} --pidfile=celerybeat.pid"  # noqa: E501
             # https://docs.celeryq.dev/en/latest/userguide/periodic-tasks.html#using-custom-scheduler-classes
             # celerybeat_cmd += " --scheduler django_celery_beat.schedulers:DatabaseScheduler"
             # celerybeat_cmd += " -S django"
             subprocess.Popen(
-                shlex.split(celerybeat_cmd),
-                stdin=subprocess.PIPE, stderr=subprocess.STDOUT
+                shlex.split(celerybeat_cmd), stdin=subprocess.PIPE, stderr=subprocess.STDOUT
             )
 
         if not self.options['flower']:
             subprocess.Popen(
-                shlex.split(f"celery -A {self.celery_app} flower --url_prefix=flower"),
-                stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE
+                shlex.split(f'celery -A {self.celery_app} flower --url_prefix={self.flower_url_prefix}'),
+                stdin=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
             )
 
-    # def get_main_process(self) -> set[int]:
-    #     """
-    #     Возвращает список pid активных celery процессов (если они есть).
-    #     """
-    #     processes_pids = set()
-    #     for process in psutil.process_iter():
-    #         ppid = process.ppid()
-    #         if ppid == 0:
-    #             continue
-    #         try:
-    #             parent = psutil.Process(ppid)
-    #         except psutil.NoSuchProcess:
-    #             pass
-    #         else:
-    #             if process.name().startswith('python') and parent.name().startswith('celery'):
-    #                 processes_pids.add(process.pid)
-    #                 processes_pids.add(parent.pid)
-    #         return processes_pids
-
-    def kill_celery_processes(self, processes_pids: set[int] = set()):
+    def kill_celery_processes(self):
         """
         Убивает celery процесс(ы).
         """
-        if sys.platform == "win32":
-            subprocess.call(shlex.split("TASKKILL /F /T /IM celery.exe"), **self._std)
+        if sys.platform == 'win32':
+            subprocess.call(shlex.split('TASKKILL /F /T /IM celery.exe'), **self._std)
             # subprocess.run(["celery", "-A", self.project_name, "control", "shutdown"], **self._std)
         else:
-            subprocess.call(shlex.split("pkill celery"), **self._std)
-            # for pid in processes_pids:
-            #     os.kill(pid, signal.SIGTERM)
+            subprocess.call(shlex.split('pkill celery'), **self._std)
 
     def reload_celery(self):
         """
         Убивает процесс(ы) celery если он(и) есть и заного запускает celery.
         """
-        # self.kill_celery_processes(self.get_main_process())
         self.kill_celery_processes()
 
-        if sys.platform == "win32":
+        if sys.platform == 'win32':
             self.run_celery_win()
         else:
             subprocess.run(shlex.split(self.command))
@@ -133,24 +114,28 @@ class Command(BaseCommand):
         Возвращает название приложения celery (если находит)
         и команду для запуска worker (если она была передана).
         """
+        self.flower_url_prefix = (
+            os.environ.get('CELERY_FLOWER_URL_PREFIX', None)
+            or getattr(settings, 'CELERY_FLOWER_URL_PREFIX', None)
+            or default_app.conf.get('CELERY_FLOWER_URL_PREFIX', 'flower')
+        )
         if self.args:
             cmd = self.args[0].split()
             cmd_len = len(cmd)
             if cmd_len == 1:
                 return cmd[0], None
-            else:
-                for i in range(cmd_len):
-                    if cmd[i] == '-A':
-                        return cmd[i+1].strip(), self.args[0]
+            for i in range(cmd_len):
+                if cmd[i] == '-A':
+                    return cmd[i + 1].strip(), self.args[0]
 
-                    if cmd[i].startswith('--app'):
-                        return cmd[i].split('=')[-1].strip(), self.args[0]
+                if cmd[i].startswith('--app'):
+                    return cmd[i].split('=')[-1].strip(), self.args[0]
         else:
             if os.environ.get('CELERY_APP'):
                 return os.environ.get('CELERY_APP'), None
 
             settings_filename = 'settings.py'
-            for root, dirs, files in os.walk(self.BASE_DIR):
+            for root, _dirs, files in os.walk(self.BASE_DIR):
                 if settings_filename in files:
                     return root.rsplit('/', 1)[-1], None
 
