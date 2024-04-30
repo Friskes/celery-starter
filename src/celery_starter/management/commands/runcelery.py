@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand
 from django.utils import autoreload
 from dotenv import find_dotenv, load_dotenv
 
-from celery_starter import _localization as L  # noqa: N812
+from ... import _localization as L  # noqa: TID252, N812
 
 if TYPE_CHECKING:
     from argparse import _ActionsContainer
