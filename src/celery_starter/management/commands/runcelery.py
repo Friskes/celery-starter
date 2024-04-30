@@ -128,6 +128,7 @@ class Command(BaseCommand):
             cmd_len = len(cmd)
             if cmd_len == 1:
                 return cmd[0], None
+
             for i in range(cmd_len):
                 if cmd[i] == '-A':
                     return cmd[i + 1].strip(), self.args[0]
