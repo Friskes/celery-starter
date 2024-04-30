@@ -1,7 +1,6 @@
 *.pyc
 *.db
 *~
-.*
 
 build/
 dist/
@@ -12,3 +11,8 @@ venv/
 
 __pycache__
 .git
+trash
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage

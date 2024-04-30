@@ -5,6 +5,7 @@ import shlex
 import signal
 import subprocess
 import sys
+from typing import TYPE_CHECKING, Any
 
 from celery.app import default_app
 from django.conf import settings
@@ -12,7 +13,10 @@ from django.core.management.base import BaseCommand
 from django.utils import autoreload
 from dotenv import find_dotenv, load_dotenv
 
-from . import _localization as L  # noqa: N812
+from celery_starter import _localization as L  # noqa: N812
+
+if TYPE_CHECKING:
+    from argparse import _ActionsContainer
 
 load_dotenv(find_dotenv())
 
@@ -26,7 +30,7 @@ class Command(BaseCommand):
 
     BASE_DIR = str(settings.BASE_DIR) + os.sep
 
-    def read_pid_file(self, file_name: str):
+    def read_pid_file(self, file_name: str) -> None:
         """
         Считывает pid из файла, убивает связанный с ним процесс и удаляет этот файл.
         Файл создается автоматически средствами celery beat
@@ -45,7 +49,7 @@ class Command(BaseCommand):
 
             os.remove(self.BASE_DIR + file_name)
 
-    def run_celery_win(self):
+    def run_celery_win(self) -> None:
         """
         Запускает celery[worker/beat/flower] на Windows
         с выводом логов в одну консоль, для локальной разработки.
@@ -88,7 +92,7 @@ class Command(BaseCommand):
                 stdout=subprocess.PIPE,
             )
 
-    def kill_celery_processes(self):
+    def kill_celery_processes(self) -> None:
         """
         Убивает celery процесс(ы).
         """
@@ -98,7 +102,7 @@ class Command(BaseCommand):
         else:
             subprocess.call(shlex.split('pkill celery'), **self._std)
 
-    def reload_celery(self):
+    def reload_celery(self) -> None:
         """
         Убивает процесс(ы) celery если он(и) есть и заного запускает celery.
         """
@@ -132,7 +136,7 @@ class Command(BaseCommand):
                     return cmd[i].split('=')[-1].strip(), self.args[0]
         else:
             if os.environ.get('CELERY_APP'):
-                return os.environ.get('CELERY_APP'), None
+                return os.environ['CELERY_APP'], None
 
             settings_filename = 'settings.py'
             for root, _dirs, files in os.walk(self.BASE_DIR):
@@ -141,7 +145,7 @@ class Command(BaseCommand):
 
         raise ValueError(L.celery_app_not_found)
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: _ActionsContainer) -> None:
         """
         Добавляет парсер для аргументов которые попадают в options метода handle.
         """
@@ -152,11 +156,11 @@ class Command(BaseCommand):
         parser.add_argument('-ll', '--loglevel', default='INFO', type=str, help=L.log_level)
         parser.add_argument('-lf', '--logfile', default='', type=str, help=L.log_file)
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         """
         Срабатывает при первом запуске и изменении любого файла проекта.
         """
-        self.args: tuple[str] = args
+        self.args: tuple[str, ...] = args
         self.options = options
         self.celery_app, self.command = self.get_celery_app()
 
@@ -184,7 +188,7 @@ class Command(BaseCommand):
                 + self.style.WARNING('DEBUG')
                 + self.style.SUCCESS(msg.split('[')[1].split(']')[1].split('DEBUG')[1])
             )
-            self._std = {}
+            self._std: dict[str, Any] = {}
         else:
             colored_msg += self.style.SUCCESS(']' + msg.split('[')[1].split(']')[1])
             self._std = dict(stdin=subprocess.PIPE, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
