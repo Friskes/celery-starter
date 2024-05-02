@@ -56,9 +56,9 @@ ci = [
 
 
 [project.urls]
-"Repository" = "https://github.com/Friskes/celery-starter"
-"Changelog" = "https://github.com/Friskes/celery-starter/releases/"
-"Bug Reports" = "https://github.com/Friskes/celery-starter/issues"
+Homepage = "https://github.com/Friskes/celery-starter"
+Changelog = "https://github.com/Friskes/celery-starter/releases/"
+Issues = "https://github.com/Friskes/celery-starter/issues"
 
 
 [build-system]
