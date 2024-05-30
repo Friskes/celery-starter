@@ -136,8 +136,13 @@ class Command(BaseCommand):
                 if cmd[i].startswith('--app'):
                     return cmd[i].split('=')[-1].strip(), self.args[0]
         else:
-            if os.environ.get('CELERY_APP'):
-                return os.environ['CELERY_APP'], None
+            celery_app = (
+                os.environ.get('CELERY_APP', None)
+                or getattr(settings, 'CELERY_APP', None)
+                or default_app.conf.get('CELERY_APP', 'app')
+            )
+            if celery_app:
+                return celery_app, None
 
             settings_filename = 'settings.py'
             for root, _dirs, files in os.walk(self.BASE_DIR):
