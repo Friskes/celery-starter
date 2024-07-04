@@ -49,10 +49,10 @@ class Command(BaseCommand):
 
             os.remove(self.BASE_DIR + file_name)
 
-    def run_celery_win(self) -> None:
+    def run_celery(self) -> None:
         """
-        Запускает celery[worker/beat/flower] на Windows
-        с выводом логов в одну консоль, для локальной разработки.
+        Запускает celery[worker/beat/flower]
+        с выводом логов в одну консоль. Для локальной разработки.
         """
         # -P --pool
         # prefork  # default (windows not work, linux multiple processes)
@@ -86,9 +86,9 @@ class Command(BaseCommand):
 
         if not self.options['flower']:
             subprocess.Popen(
-                shlex.split(f'celery -A {self.celery_app} flower --url_prefix={self.flower_url_prefix}'),
+                shlex.split(f'celery flower -A {self.celery_app} --url_prefix={self.flower_url_prefix}'),
                 stdin=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
                 stdout=subprocess.PIPE,
             )
 
@@ -108,10 +108,7 @@ class Command(BaseCommand):
         """
         self.kill_celery_processes()
 
-        if sys.platform == 'win32':
-            self.run_celery_win()
-        else:
-            subprocess.run(shlex.split(self.command))
+        self.run_celery()
 
     def get_celery_app(self) -> tuple[str, str | None]:
         """
