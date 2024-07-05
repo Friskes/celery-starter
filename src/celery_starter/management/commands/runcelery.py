@@ -86,7 +86,7 @@ class Command(BaseCommand):
 
         if not self.options['flower']:
             subprocess.Popen(
-                shlex.split(f'celery flower -A {self.celery_app} --url_prefix={self.flower_url_prefix}'),
+                shlex.split(f'celery --broker=redis://localhost:6379// flower -A {self.celery_app} --url_prefix={self.flower_url_prefix}'),  # noqa: E501
                 stdin=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 stdout=subprocess.PIPE,
