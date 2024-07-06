@@ -1,5 +1,6 @@
 import os
 
+import django
 from django.conf import settings
 
 
@@ -8,4 +9,8 @@ def pytest_configure() -> None:
 
     settings.configure(
         BASE_DIR=base_dir,
+        INSTALLED_APPS=[
+            'celery_starter',
+        ],
     )
+    django.setup()

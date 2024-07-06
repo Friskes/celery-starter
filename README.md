@@ -31,27 +31,38 @@ python manage.py runcelery
 
 Arguments can be passed in any order, it doesn't matter.
 
-### Positional Arguments:
-`<celery app name>`
-or
-`<"full command to run celery worker">`
-
 ### Optional Arguments:
 `-h` or `--help` Show help message.<br/>
-`-b` or `--beat` Excludes the beat server at startup.<br/>
-`-f` or `--flower` Excludes the flower server at startup.<br/>
+`-w` or `--worker` Full command line to run worker or options that extend the default command line.<br/>
+`-b` or `--beat` Full command line to run beat or options that extend the default command line.<br/>
+`-f` or `--flower` Full command line to run flower or options that extend the default command line.<br/>
+`-eb` or `--exclude-beat` Excludes the beat server at startup.<br/>
+`-ef` or `--exclude-flower` Excludes the flower server at startup.<br/>
 `-d` or `--debug` Displays information about successful/unsuccessful completion of processes.<br/>
-`-ll` or `--loglevel` Defines the logging level for celery worker/beat
-`-lf` or `--logfile` Redirects the output to the console by default to a log file for celery worker/beat
 
 #### To stopped program pressing the keyboard shortcut `CTRL+C`
 
 ### Examples of Commands
-The command enclosed in quotation marks gets into the positional arguments and replaces the command to run the default celery worker.
-The `--beat` `--flower` commands fall into the optional arguments and turn off the beat and flower of the server.
-```shell script
-python manage.py runcelery "celery --app=${CELERY_APP} worker -E \
---hostname=worker-example@%h
---uid=nobody --gid=nogroup \
---loglevel=INFO" --beat --flower
+> default commands:
+
+```shell
+# worker cmd
+celery -A <CELERY_APP> worker -E -l INFO -P gevent
+
+# beat cmd
+celery -A <CELERY_APP> beat --pidfile=celerybeat.pid -l INFO
+
+# flower cmd
+celery --broker=redis://localhost:6379// flower -A <CELERY_APP> --url_prefix=flower
 ```
+
+> valid commands:
+```shell
+# redefining the -A and -P parameter and adding a new --broker parameter to the default worker command
+python manage.py runcelery -w "-A <CELERY_APP> -P solo --broker=redis://localhost:6379//"
+
+# complete replacement of the default worker command with the passed command
+python manage.py runcelery -w "celery -A <CELERY_APP> worker"
+```
+
+#### Working with beat and flower commands works in a similar way.

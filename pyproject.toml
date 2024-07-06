@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Framework :: Django :: 3.2",
     "Framework :: Django :: 4.0",
     "Framework :: Django :: 4.1",
     "Framework :: Django :: 4.2",
@@ -31,11 +30,15 @@ classifiers = [
 ]
 # pip install .
 dependencies = [
-    "django>=4.2.11",
+    "django>=4.0.0",
     "celery>=5.3.6",
     "python-dotenv>=1.0.1",
 ]
 
+
+# Для того чтобы при запуске тестов использовалось приложение из директории src/celery_starter
+# а не из venv/Lib/celery_starter необходимо устанавливать символическую ссылку на приложение
+# в venv а не само приложение с помощью команды: pip install -e .[dev]
 
 # pip install .[dev]
 # pip install .[ci]
@@ -75,13 +78,6 @@ setuptools_scm = "setuptools_scm._integration.setuptools:infer_version"
 [tool.setuptools_scm]
 
 
-# https://setuptools.pypa.io/en/latest/userguide/datafiles.html#package-data
-# https://packaging.python.org/en/latest/guides/distributing-packages-using-setuptools/#package-data
-# Данная настройка позволяет заменить MANIFEST.in файл для добавления дополнительных файлов в пакет
-[tool.setuptools.package-data]
-"drf_spectacular_websocket" = ["drf_spectacular_websocket/templates/swagger_ui.js"]
-
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
@@ -98,7 +94,7 @@ filterwarnings = [
 
 [tool.mypy]
 # for ignore rules:  # type: ignore[error_code]
-packages = ["src.celery_starter", "tests"]
+packages = ["src.celery_starter"]
 python_version = "3.9"
 strict = true  # строгая проверка типов
 ignore_missing_imports = true  # [import-untyped]
@@ -118,8 +114,8 @@ omit = ["*/tests/*"]
 parallel = true
 source = ["src.celery_starter"]
 
-# [tool.coverage.report]
-# fail_under = 80  # Тест упадёт если покрытие составит менее 80%
+[tool.coverage.report]
+fail_under = 80  # Тест упадёт если покрытие составит менее 80%
 
 
 # https://docs.astral.sh/ruff/settings/
@@ -181,6 +177,7 @@ extend-select = [
     "SIM",    # https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
     "TID",    # https://docs.astral.sh/ruff/rules/#flake8-tidy-imports-tid
     "TCH",    # https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
+    "TD",     # https://docs.astral.sh/ruff/rules/#flake8-todos-td
     "INT",    # https://docs.astral.sh/ruff/rules/#flake8-gettext-int
     "FLY",    # https://docs.astral.sh/ruff/rules/#flynt-fly
     "PERF",   # https://docs.astral.sh/ruff/rules/#perflint-perf
@@ -191,8 +188,8 @@ extend-select = [
 ]
 ignore = [
     # https://docs.astral.sh/ruff/rules/#pyflakes-f
-    "F401",    # (не ругаться на неиспользуемые импорты)
-    "F841",    # (не ругаться на неиспользуемые переменные)
+    # "F401",    # (не ругаться на неиспользуемые импорты)
+    # "F841",    # (не ругаться на неиспользуемые переменные)
     "F403",    # (не ругаться на использование from ... import *)
     # https://docs.astral.sh/ruff/rules/#pyupgrade-up
     "UP031",   # (не ругаться на форматирование с помощью %s)
@@ -219,11 +216,16 @@ ignore = [
     "RET503",  # (не ругаться на отсутствие return None в конце функций)
     # https://docs.astral.sh/ruff/rules/#flake8-blind-except-ble
     "BLE001",  # (не ругаться на обработку обычного Exception)
-    # https://docs.astral.sh/ruff/rules/#flake8-django-dj  #! (ВРЕМЕННО)
+    # https://docs.astral.sh/ruff/rules/#flake8-django-dj
+    # https://docs.djangoproject.com/en/4.2/ref/models/fields/#null
+    # https://sentry.io/answers/django-difference-between-null-and-blank/
+    # https://www.django-rest-framework.org/api-guide/fields/#charfield
     "DJ001",   # (не ругаться на использование null в моделях для текстовых полей)
     # https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
     # {} VS dict()  # https://switowski.com/blog/dict-function-vs-literal-syntax/
     "C408",    # (не ругаться на использование классов коллекций вместо их литералов)
+    "TD001",   # (не ругаться на использование FIXME и XXX)
+    "TD003",   # (не ругаться на отсутствие ссылки на issues)
 ]
 # Не давать исправлять эти ошибки в тултипе, и в том числе автоматически при линте через команду
 unfixable = [
