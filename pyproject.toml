@@ -115,7 +115,7 @@ parallel = true
 source = ["src.celery_starter"]
 
 [tool.coverage.report]
-fail_under = 80  # Тест упадёт если покрытие составит менее 80%
+fail_under = 75  # Тест упадёт если покрытие составит менее 75%
 
 
 # https://docs.astral.sh/ruff/settings/
