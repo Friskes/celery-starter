@@ -228,11 +228,11 @@ class Command(BaseCommand):
         subprocess.Popen(self.constr.worker_cmd, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
         # subprocess.run(self.constr.worker_cmd)
 
-        if not self.options['exclude-beat']:
+        if not self.options['exclude_beat']:
             self.read_pid_file(CELERY_BEAT_PID_FILENAME)
             subprocess.Popen(self.constr.beat_cmd, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
 
-        if not self.options['exclude-flower']:
+        if not self.options['exclude_flower']:
             subprocess.Popen(
                 self.constr.flower_cmd,
                 stdin=subprocess.PIPE,
@@ -266,10 +266,10 @@ class Command(BaseCommand):
         parser.add_argument('-b', '--beat', default='', type=str, help=L.beat_help)
         parser.add_argument('-f', '--flower', default='', type=str, help=L.flower_help)
         parser.add_argument(
-            '-eb', '--exclude-beat', action='store_true', default=False, help=L.exclude_beat_help
+            '-eb', '--exclude_beat', action='store_true', default=False, help=L.exclude_beat_help
         )
         parser.add_argument(
-            '-ef', '--exclude-flower', action='store_true', default=False, help=L.exclude_flower_help
+            '-ef', '--exclude_flower', action='store_true', default=False, help=L.exclude_flower_help
         )
         parser.add_argument('-d', '--debug', action='store_true', default=False, help=L.debug_help)
 
@@ -282,8 +282,8 @@ class Command(BaseCommand):
 
         self.options = options
 
-        beat = 'beat ' if not self.options['beat'] else ''
-        flower = 'flower ' if not self.options['flower'] else ''
+        beat = 'beat ' if not self.options['exclude_beat'] else ''
+        flower = 'flower ' if not self.options['exclude_flower'] else ''
 
         if self.options['debug']:
             msg = L.start_msg % (self.constr.celery_app, beat, flower) + L.debug_msg
