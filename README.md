@@ -33,11 +33,11 @@ Arguments can be passed in any order, it doesn't matter.
 
 ### Optional Arguments:
 `-h` or `--help` Show help message.<br/>
-`-w` or `--worker` Full command line to run worker or options that extend the default command line.<br/>
-`-b` or `--beat` Full command line to run beat or options that extend the default command line.<br/>
-`-f` or `--flower` Full command line to run flower or options that extend the default command line.<br/>
-`-eb` or `--exclude-beat` Excludes the beat server at startup.<br/>
-`-ef` or `--exclude-flower` Excludes the flower server at startup.<br/>
+`-w <cmd>` or `--worker <cmd>` Full command line to run worker or options that extend the default command line.<br/>
+`-b <cmd>` or `--beat <cmd>` Full command line to run beat or options that extend the default command line.<br/>
+`-f <cmd>` or `--flower <cmd>` Full command line to run flower or options that extend the default command line.<br/>
+`-eb` or `--exclude_beat` Excludes the beat server at startup.<br/>
+`-ef` or `--exclude_flower` Excludes the flower server at startup.<br/>
 `-d` or `--debug` Displays information about successful/unsuccessful completion of processes.<br/>
 
 #### To stopped program pressing the keyboard shortcut `CTRL+C`
