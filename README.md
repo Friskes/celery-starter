@@ -75,3 +75,6 @@ python manage.py runcelery -w "celery -A <CELERY_APP> worker"
 ```
 
 #### Working with beat and flower commands works in a similar way.
+
+## Contributing
+We would love you to contribute to `celery-starter`, pull requests are very welcome! Please see [CONTRIBUTING.md](https://github.com/Friskes/celery-starter/blob/main/CONTRIBUTING.md) for more information.
