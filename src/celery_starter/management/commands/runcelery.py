@@ -37,7 +37,7 @@ class ConstantNotFoundError(Exception):
 class ConstructorCommand:
     """"""
 
-    default_worker_cmd = 'celery -A %s worker -E -l INFO -P gevent'
+    default_worker_cmd = 'celery -A %s worker -E -l INFO -P solo'
     default_beat_cmd = 'celery -A %s beat --pidfile=%s -l INFO'
     default_flower_cmd = 'celery --broker=redis://localhost:6379// flower -A %s --url_prefix=%s'
 
@@ -136,7 +136,7 @@ class ConstructorCommand:
         prefork  # default (windows not work, linux multiple processes)
         solo  # (windows/linux single process)
         threads  # (windows/linux multiple threading) too slow
-        eventlet | gevent  # (windows/linux multiple processes)
+        gevent | eventlet  # (windows/linux multiple processes)
         """
         if not cmd:
             self.worker_cmd = shlex.split(self.default_worker_cmd % self.celery_app)

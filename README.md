@@ -11,6 +11,10 @@
 
 </div>
 
+## Benefits of using this cli
+> 1. The ability to run up to three servers (worker, beat, flower) simultaneously in one terminal, instead of running by default in three different terminals.
+> 2. Automatic reboot of these servers when your codebase changes
+
 ## Install
 1. Install package
     ```bash
@@ -47,7 +51,8 @@ Arguments can be passed in any order, it doesn't matter.
 
 ```shell
 # worker cmd
-celery -A <CELERY_APP> worker -E -l INFO -P gevent
+# (WARNING) Note that the default pool is solo, because of this, all tasks will be performed sequentially, to get parallelism, install one of the libraries [gevent | eventlet] and redefine the default pool in cmd.
+celery -A <CELERY_APP> worker -E -l INFO -P solo
 
 # beat cmd
 celery -A <CELERY_APP> beat --pidfile=celerybeat.pid -l INFO
@@ -59,7 +64,7 @@ celery --broker=redis://localhost:6379// flower -A <CELERY_APP> --url_prefix=flo
 > valid commands:
 ```shell
 # redefining the -A and -P parameter and adding a new --broker parameter to the default worker command
-python manage.py runcelery -w "-A <CELERY_APP> -P solo --broker=redis://localhost:6379//"
+python manage.py runcelery -w "-A <CELERY_APP> -P gevent --broker=redis://localhost:6379//"
 
 # complete replacement of the default worker command with the passed command
 python manage.py runcelery -w "celery -A <CELERY_APP> worker"

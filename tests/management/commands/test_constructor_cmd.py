@@ -216,7 +216,7 @@ class CommandTests(SimpleTestCase):
                 '-l',
                 'INFO',
                 '-P',
-                'gevent',
+                'solo',
                 '--broker=redis://localhost:6379//',
                 '--result-backend=redis://localhost:6379//',
             ],
