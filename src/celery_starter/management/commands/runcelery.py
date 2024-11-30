@@ -203,8 +203,8 @@ class Command(BaseCommand):
 
     def read_pid_file(self, file_name: str) -> None:
         """
-        Считывает pid из файла, убивает связанный с ним процесс и удаляет этот файл.
-        Файл создается автоматически средствами celery beat
+        Reads the pid from a file, kills the associated process, and deletes that file.
+        The file is created automatically by celery beat.
         """
         if file_name in os.listdir(self.BASE_DIR):
             with open(file_name) as file:
@@ -222,8 +222,8 @@ class Command(BaseCommand):
 
     def run_celery(self) -> None:
         """
-        Запускает celery[worker/beat/flower]
-        с выводом логов в одну консоль. Для локальной разработки.
+        Launches celery[worker/beat/flower]
+        with logs output to one console. For local development.
         """
         subprocess.Popen(self.constr.worker_cmd, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
         # subprocess.run(self.constr.worker_cmd)
@@ -242,7 +242,7 @@ class Command(BaseCommand):
 
     def kill_celery_processes(self) -> None:
         """
-        Убивает celery процесс(ы).
+        Kills the celery process(s).
         """
         if sys.platform == 'win32':
             subprocess.call(shlex.split('TASKKILL /F /T /IM celery.exe'), **self._std)
@@ -252,7 +252,7 @@ class Command(BaseCommand):
 
     def reload_celery(self) -> None:
         """
-        Убивает процесс(ы) celery если он(и) есть и заного запускает celery.
+        Kills the celery process(s) if there is one and restarts celery.
         """
         self.kill_celery_processes()
 
@@ -260,7 +260,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser) -> None:
         """
-        Добавляет парсер для аргументов которые попадают в options метода handle.
+        Adds a parser for arguments that fall into the options of the handle method.
         """
         parser.add_argument('-w', '--worker', default='', type=str, help=L.worker_help)
         parser.add_argument('-b', '--beat', default='', type=str, help=L.beat_help)
@@ -275,7 +275,7 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> None:
         """
-        Срабатывает при первом запуске и изменении любого файла проекта.
+        It is triggered when any project file is first started and modified.
         """
         if not hasattr(self.constr, 'celery_app'):
             self.constr.parse_options(options)
